@@ -376,7 +376,7 @@ function App() {
           {/* Card 1 — Retro Portfolio */}
           <div className="play-card">
             <div className="play-video-wrap">
-              <video autoPlay muted loop playsInline src="/Retro Portfolio.mov" style={{ width: '100%', height: '100%', objectFit: 'cover' }}></video>
+              <video autoPlay muted loop playsInline src="/Retro Portfolio.mov?v=2" style={{ width: '100%', height: '100%', objectFit: 'cover' }}></video>
             </div>
             <h3 className="play-title">Retro Portfolio</h3>
             <p className="play-sub">A nostalgic take on personal branding — CRT aesthetics, retro UI patterns, and analog warmth.</p>
@@ -386,7 +386,7 @@ function App() {
           {/* Card 2 — Animated Portfolio */}
           <div className="play-card">
             <div className="play-video-wrap">
-              <video autoPlay muted loop playsInline src="/Animated Portolio.mov" style={{ width: '100%', height: '100%', objectFit: 'cover' }}></video>
+              <video autoPlay muted loop playsInline src="/Animated Portfolio.mov?v=2" style={{ width: '100%', height: '100%', objectFit: 'cover' }}></video>
             </div>
             <h3 className="play-title">Animated Portfolio</h3>
             <p className="play-sub">Motion-driven experience design — fluid transitions, kinetic typography, and immersive scroll.</p>
