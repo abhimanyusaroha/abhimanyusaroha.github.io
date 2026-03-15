@@ -1,9 +1,11 @@
 import React, { useEffect, useState } from 'react';
 import Lenis from 'lenis';
 import './index.css';
+import ThemeToggle from './components/ThemeToggle';
 
 function App() {
   const [openFaq, setOpenFaq] = useState(null);
+  const [menuOpen, setMenuOpen] = useState(false);
 
   useEffect(() => {
     // Cursor logic
@@ -37,7 +39,7 @@ function App() {
           io.unobserve(e.target);
         }
       });
-    }, { threshold: 0.06 });
+    }, { threshold: 0.08 });
 
     document.querySelectorAll('.reveal').forEach(el => io.observe(el));
 
@@ -45,7 +47,7 @@ function App() {
     const navEl = document.getElementById('nav');
     const onScroll = () => {
       if (navEl) {
-        navEl.style.background = window.scrollY > 20 ? 'rgba(242,240,235,.98)' : 'rgba(242,240,235,.93)';
+        navEl.style.background = window.scrollY > 20 ? 'var(--nav-bg)' : 'var(--nav-bg)';
       }
     };
     window.addEventListener('scroll', onScroll, { passive: true });
@@ -114,7 +116,7 @@ function App() {
       el.addEventListener('mouseleave', handleMouseLeave);
     });
 
-    const projEls = document.querySelectorAll('.proj-split');
+    const projEls = document.querySelectorAll('.proj-split, .play-card');
     projEls.forEach(el => {
       el.addEventListener('mouseenter', handleProjEnter);
       el.addEventListener('mouseleave', handleProjLeave);
@@ -132,6 +134,8 @@ function App() {
     };
   }, []);
 
+
+
   const toggleFaq = (index) => {
     setOpenFaq(openFaq === index ? null : index);
   };
@@ -140,7 +144,7 @@ function App() {
     <>
       {/* WELCOME ANIMATION */}
       <div id="welcome">
-        <div id="welcome-text">ABHIMANYU</div>
+        <div id="welcome-text">ABHIMANYU SAROHA</div>
         <div id="welcome-line"></div>
       </div>
 
@@ -151,21 +155,44 @@ function App() {
       {/* NAV */}
       <nav id="nav">
         <a className="nav-logo" href="#">ABHIMANYU <em>SAROHA</em></a>
+
+        {/* Desktop Links */}
         <ul className="nav-links">
-          <li><a href="#services">Services</a></li>
           <li><a href="#works">Works</a></li>
+          <li><a href="#experience">Experience</a></li>
           <li><a href="#about">About</a></li>
+          <li><a href="#services">Services</a></li>
           <li><a href="#contact">Contact</a></li>
+          <li><a href="https://drive.google.com/file/d/14hs7C0MBlUkLx9UE76gZtUHloqJWA8zL/view?usp=sharing" target="_blank" rel="noopener noreferrer">RÉSUMÉ <span className="nav-resume-icon">↗</span></a></li>
         </ul>
+
         <div className="nav-right">
+          <ThemeToggle />
           <div className="avail"><div className="avail-dot"></div>Available for work</div>
+          <button className="hamburger" onClick={() => setMenuOpen(!menuOpen)}>
+            <span className={`bar ${menuOpen ? 'open' : ''}`}></span>
+            <span className={`bar ${menuOpen ? 'open' : ''}`}></span>
+          </button>
         </div>
       </nav>
+
+      {/* MOBILE NAV OVERLAY */}
+      <div className={`mobile-nav-overlay ${menuOpen ? 'active' : ''}`}>
+        <button className="close-menu" onClick={() => setMenuOpen(false)}>✕</button>
+        <ul className="mobile-nav-links">
+          <li><a href="#works" onClick={() => setMenuOpen(false)}>Works</a></li>
+          <li><a href="#experience" onClick={() => setMenuOpen(false)}>Experience</a></li>
+          <li><a href="#about" onClick={() => setMenuOpen(false)}>About</a></li>
+          <li><a href="#services" onClick={() => setMenuOpen(false)}>Services</a></li>
+          <li><a href="#contact" onClick={() => setMenuOpen(false)}>Contact</a></li>
+          <li><a href="https://drive.google.com/file/d/14hs7C0MBlUkLx9UE76gZtUHloqJWA8zL/view?usp=sharing" target="_blank" rel="noopener noreferrer" className="mobile-resume-link">RÉSUMÉ <span className="nav-resume-icon">↗</span></a></li>
+        </ul>
+      </div>
 
       {/* HERO */}
       <section className="hero">
         <div className="hero-meta-row">
-          <span className="hero-meta">Product Designer · India · 2025</span>
+          <span className="hero-meta">Product Designer · India · 2026</span>
           <span className="hero-meta">001 / Intro</span>
         </div>
 
@@ -176,9 +203,12 @@ function App() {
           </div>
           <div className="hl-middle-left">
             <p className="hl-intro">
-              Product Designer specializing in <strong>AI-native experiences and intelligent systems.</strong>
-              <br />Designing human-in-the-loop workflows, trust-building feedback systems, and LLM-assisted automation.
+              Hi, I'm Abhimanyu. I design products that ship fast because I don't work like it's 2020 anymore.
+              <br /><span style={{ color: 'var(--muted)' }}>Faster than your last agency. Cheaper than your next hire.</span>
             </p>
+            <a href="https://drive.google.com/file/d/14hs7C0MBlUkLx9UE76gZtUHloqJWA8zL/view?usp=sharing" target="_blank" rel="noopener noreferrer" className="hero-resume-btn">
+              <span className="hero-resume-arrow">↓</span> DOWNLOAD RÉSUMÉ
+            </a>
           </div>
           <div className="hl-middle-right">
             <span className="hl-word2">WITH</span>
@@ -197,7 +227,7 @@ function App() {
             <div className="hstat-divider"></div>
             <div className="hstat">
               <span className="hstat-n">12+</span>
-              <span className="hstat-l">Live Products</span>
+              <span className="hstat-l">Products Worked On</span>
             </div>
             <div className="hstat-divider"></div>
             <div className="hstat">
@@ -241,11 +271,202 @@ function App() {
         </div>
       </div>
 
+      {/* WORKS */}
+      <section id="works" className="reveal">
+        <div className="sec-header">
+          <div className="sec-eye">002 / Works</div>
+          <div className="sec-big">Featured<br />Projects</div>
+        </div>
+
+        {/* JUBEE */}
+        <div className="proj-split" data-cursor="view">
+          <div className="proj-vis" style={{ background: `url('/jubee-new.png') center/cover no-repeat var(--off)` }}>
+            <div className="proj-vis-tag">Enterprise AI Platform</div>
+            <div className="proj-vis-url">jubee001.vercel.app</div>
+          </div>
+          <div className="proj-info">
+            <div>
+              <div className="proj-cat">Legal Tech · Enterprise · 2026</div>
+              <div className="proj-meta" style={{ color: 'var(--muted)', fontFamily: '"DM Mono", monospace', fontSize: '10px', letterSpacing: '0.1em', marginTop: '6px', marginBottom: '16px', textTransform: 'uppercase' }}>→ 4 WEEKS · 2026 · SOLO</div>
+              <div className="proj-title">JUBEE</div>
+              <p className="proj-sub">9-module legal AI platform. Designed end-to-end solo in 4 weeks using Figma Make + Claude. Shipped to production.</p>
+              <div className="proj-chips">
+                <span className="chip hi">Human-in-the-Loop</span>
+                <span className="chip hi">9 Modules</span>
+                <span className="chip">Enterprise-Grade</span>
+                <span className="chip">Agentic Validation</span>
+                <span className="chip">Claude</span>
+              </div>
+            </div>
+            <div className="proj-links-row">
+              <a href="https://jubee001.vercel.app/login" target="_blank" rel="noreferrer" className="proj-link">View Live Platform</a>
+              <a href="https://www.behance.net/gallery/244312605/Jubee-Legal-Productivity-Ecosystem-UX-Case-Study" target="_blank" rel="noreferrer" className="proj-link">View Case Study</a>
+            </div>
+          </div>
+        </div>
+
+        {/* MADEASME */}
+        <div className="proj-split" data-cursor="view">
+          <div className="proj-vis" style={{
+            background: `url('/MadeasMe.png') center/cover no-repeat var(--off)`
+          }}>
+            <div className="proj-vis-tag">Multi-Vendor</div>
+            <div className="proj-vis-url">madeasme.com</div>
+          </div>
+          <div className="proj-info">
+            <div>
+              <div className="proj-cat">Fashion E-Commerce · 2025</div>
+              <div className="proj-meta" style={{ color: 'var(--muted)', fontFamily: '"DM Mono", monospace', fontSize: '10px', letterSpacing: '0.1em', marginTop: '6px', marginBottom: '16px', textTransform: 'uppercase' }}>→ 34 WEEKS · 2025 · SOLO</div>
+              <div className="proj-title">MADE<br />AS ME</div>
+              <p className="proj-sub">Personal portfolio experiment. Built and shipped in 34 weeks using AI-assisted design workflow end to end.</p>
+              <div className="proj-chips">
+                <span className="chip hi">4 Surfaces</span>
+                <span className="chip">POS + Mobile</span>
+                <span className="chip">Admin Dashboard</span>
+                <span className="chip">Multi-Vendor</span>
+              </div>
+            </div>
+            <div className="proj-links-row">
+              <a href="https://madeasme.com" target="_blank" rel="noreferrer" className="proj-link">View Live Platform</a>
+              <a href="https://www.behance.net/gallery/242095089/MadeAsMe-A-Ecommerce-Ecosystem" target="_blank" rel="noreferrer" className="proj-link">View Case Study</a>
+            </div>
+          </div>
+        </div>
+
+        {/* VR TRAINING */}
+        <a href="https://www.behance.net/gallery/242494633/VR-Safety-Training-App" target="_blank" rel="noreferrer" className="proj-split" data-cursor="view">
+          <div className="proj-vis" style={{ background: `url('/vr-safety-new.jpg') center/cover no-repeat var(--off)` }}>
+            <div className="proj-vis-tag">Global Recognition</div>
+            <div className="proj-vis-url">Spatial UX · Industrial</div>
+          </div>
+          <div className="proj-info">
+            <div>
+              <div className="proj-cat">Spatial UX · VR · International Recognition</div>
+              <div className="proj-meta" style={{ color: 'var(--muted)', fontFamily: '"DM Mono", monospace', fontSize: '10px', letterSpacing: '0.1em', marginTop: '6px', marginBottom: '16px', textTransform: 'uppercase' }}>→ 12 WEEKS · 2024–2025 · SOLO</div>
+              <div className="proj-title">VR SAFETY<br />TRAINING</div>
+              <p className="proj-sub">Immersive VR retail experience. Designed and delivered solo over 12 weeks. Full design system built from scratch.</p>
+              <div className="proj-chips">
+                <span className="chip hi">International Recognition</span>
+                <span className="chip">Spatial / VR</span>
+                <span className="chip">3D Interactions</span>
+              </div>
+            </div>
+            <div className="proj-link">View Case Study</div>
+          </div>
+        </a>
+      </section>
+
+      {/* EXPERIENCE */}
+      <section id="experience" className="reveal">
+        <div className="sec-header">
+          <div className="sec-eye">003 / Experience</div>
+          <div className="sec-big">Where I've<br />Worked</div>
+        </div>
+
+        {/* Row 01 — Job */}
+        <div className="exp-row">
+          <div className="exp-n">01</div>
+          <div className="exp-company">
+            <div className="exp-company-name">MONKHUB INNOVATIONS</div>
+            <div className="exp-company-loc">Gurugram, Haryana</div>
+            <div className="exp-dates">May 2024 – Present</div>
+            <hr className="exp-rule" />
+          </div>
+          <div className="exp-main">
+            <div className="exp-role">
+              <span className="role-line1">PRODUCT</span>
+              <span className="role-line2"> DESIGNER</span>
+            </div>
+            <p className="exp-bio">High-autonomy designer shipping production-ready products across e-commerce, legal tech, SaaS, VR, and retail — integrating AI into every layer of the process.</p>
+
+            {/* Responsibility bullets */}
+            <ul className="exp-bullets">
+              <li><span className="exp-dash">—</span><span>Owned <strong>end-to-end design</strong> for <strong>12+ shipped digital products</strong>, improving usability, engagement, and conversion across diverse platforms.</span></li>
+              <li><span className="exp-dash">—</span><span>Integrated <strong>Claude, ChatGPT, and MCPs</strong> for research synthesis, content generation, rapid prototyping, and UX copywriting — cutting <strong>iteration cycles significantly</strong>.</span></li>
+              <li><span className="exp-dash">—</span><span>Leveraged <strong>Figma Make</strong> to generate complete, production-grade UI screens through <strong>prompt engineering</strong> — enabling solo delivery of multi-feature platforms.</span></li>
+              <li><span className="exp-dash">—</span><span>Used <strong>Anti-Gravity, Stitch, and Flow</strong> to automate repetitive design operations and <strong>scale design system components</strong> across products.</span></li>
+              <li><span className="exp-dash">—</span><span>Architected <strong>scalable design systems</strong> that accelerated delivery speed and enforced <strong>UI consistency</strong> across platforms.</span></li>
+              <li><span className="exp-dash">—</span><span>Partnered with <strong>product managers and engineers</strong> to define problem spaces, shape solutions, and ship <strong>production-ready features</strong>.</span></li>
+            </ul>
+          </div>
+          <ul className="exp-pills">
+            <li>— 12+ Shipped Products</li>
+            <li>— AI-Integrated Workflow</li>
+            <li>— 6+ Industries</li>
+            <li>— 0→1 Ownership</li>
+          </ul>
+        </div>
+      </section>
+
+      {/* ABOUT */}
+      <div className="about-split reveal" id="about">
+        <div className="about-photo" style={{ background: `url('/about-me-v4.jpg') center/cover no-repeat` }}>
+        </div>
+        <div className="about-text">
+          <div className="about-bigname">ABHIMANYU<br />SAROHA</div>
+          <div className="about-role">AI-First Product Designer · India</div>
+          <p className="about-bio">
+            <strong style={{ color: 'var(--black)' }}>One of the few designers in India who uses AI as a core workflow tool — not a buzzword.</strong>
+          </p>
+          <p className="about-bio" style={{ marginTop: '20px' }}>
+            AI-first Product Designer from India. <strong>I build real products that ship — 12+ of them.</strong> My workflow runs on Anti-Gravity, Claude & MCPs. That's the work part, moving on.<br /><br />
+            I'm a Charles Leclerc fan which is just a fancy way of saying I've developed an unmatched level of emotional endurance watching a man in a red car be <strong>incredibly fast</strong> and somehow still not win. It's fine. I'm fine.<br /><br />
+            Outside of that I'm usually on a skateboard convincing myself I'm Tony Hawk, deep in a rabbit hole about the latest Mac or phone drop, or watching tech reviews I definitely don't need at 2am.<br /><br />
+            I've also tried learning Spanish three times. Nailed uno, dos, tres every single time. Bueno días, bueno noches, and whatever you call bueno afternoon — fluent enough to start a conversation, not fluent enough to finish one. <strong>Let's work together in English.</strong>
+          </p>
+          <div className="about-links">
+            <a href="https://www.linkedin.com/in/abhimanyusaroha/" target="_blank" rel="noreferrer" className="alink">LinkedIn</a>
+            <a href="https://www.behance.net/abhimanyusaroha" target="_blank" rel="noreferrer" className="alink">Behance</a>
+            <a href="https://dribbble.com/Saroha22" target="_blank" rel="noreferrer" className="alink">Dribbble</a>
+          </div>
+        </div>
+      </div >
+
+      <div className="about-stats reveal">
+        <div className="astat"><div className="astat-n">1.5+</div><div className="astat-l">Years Shipping</div></div>
+        <div className="astat"><div className="astat-n">12+</div><div className="astat-l">Products Worked On</div></div>
+        <div className="astat"><div className="astat-n">6+</div><div className="astat-l">Industries</div></div>
+      </div>
+
+      {/* IMAGE CAROUSEL — REMOVED PER REQUEST, KEPT FOR FUTURE USE
+      <section className="image-carousel-sec reveal">
+        <div className="carousel-track">
+          {[...Array(12)].map((_, i) => (
+            <div key={i} className="carousel-img-wrap">
+              <img src="/about-me-v3.jpg" alt="Carousel item" />
+            </div>
+          ))}
+        </div>
+      </section>
+      */}
+
+      {/* TOOLS */}
+      <section id="stack" className="reveal">
+        <div className="sec-header">
+          <div className="sec-eye">005 / My Stack</div>
+          <div className="sec-big">Tools</div>
+        </div>
+        <div className="tools-grid">
+          <div className="tc primary"><div className="tc-name">Claude</div><div className="tc-label">AI Research & UX Logic</div></div>
+          <div className="tc primary"><div className="tc-name">Anti-Gravity</div><div className="tc-label">AI Design Workflow</div></div>
+          <div className="tc primary"><div className="tc-name">MCPs</div><div className="tc-label">Workflow Automation</div></div>
+          <div className="tc primary"><div className="tc-name">System Mapping</div><div className="tc-label">Architecture & Logic</div></div>
+          <div className="tc"><div className="tc-name">Figma</div><div className="tc-label">Design Tool</div></div>
+          <div className="tc"><div className="tc-name">LLM Orchestration</div><div className="tc-label">Prompt-to-UI Flow</div></div>
+          <div className="tc"><div className="tc-name">Cursor</div><div className="tc-label">AI Code Assistant</div></div>
+          <div className="tc"><div className="tc-name">UX Research</div><div className="tc-label">Human-in-the-loop</div></div>
+          <div className="tc"><div className="tc-name">Framer</div><div className="tc-label">Website Builder</div></div>
+          <div className="tc"><div className="tc-name">Flow</div><div className="tc-label">Design Automation</div></div>
+          <div className="tc"><div className="tc-name">Prototypes</div><div className="tc-label">Interaction Design</div></div>
+          <div className="tc"><div className="tc-name">Notion</div><div className="tc-label">Productivity</div></div>
+        </div>
+      </section>
+
       {/* SERVICES */}
       <section id="services" className="reveal">
         <div className="sec-header">
-          <div className="sec-eye">002 / Services</div>
-          <div className="sec-big">What I<br />Do</div>
+          <div className="sec-eye">006 / What I Offer</div>
+          <div className="sec-big">Services</div>
         </div>
         <div className="svc-row">
           <div className="svc-n">01</div>
@@ -289,82 +510,6 @@ function App() {
         </div>
       </section>
 
-      {/* WORKS */}
-      <section id="works" className="reveal">
-        <div className="sec-header">
-          <div className="sec-eye">003 / Works</div>
-          <div className="sec-big">Featured<br />Projects</div>
-        </div>
-
-        {/* JUBEE */}
-        <a href="https://jubee001.vercel.app/login" target="_blank" rel="noreferrer" className="proj-split" data-cursor="view">
-          <div className="proj-vis" style={{ background: `url('/made-as-me.png') center/cover no-repeat #060e02` }}>
-            <div className="proj-vis-tag">Enterprise AI Platform</div>
-            <div className="proj-vis-url">jubee001.vercel.app</div>
-          </div>
-          <div className="proj-info">
-            <div>
-              <div className="proj-cat">Legal Tech · Enterprise · 2024</div>
-              <div className="proj-title">JUBEE</div>
-              <p className="proj-sub">A 9-module enterprise legal platform featuring dynamic LLM document drafting and asynchronous human validation loops.</p>
-              <div className="proj-chips">
-                <span className="chip hi">Human-in-the-Loop</span>
-                <span className="chip hi">9 Modules</span>
-                <span className="chip">Enterprise-Grade</span>
-                <span className="chip">Agentic Validation</span>
-                <span className="chip">Claude</span>
-              </div>
-            </div>
-            <div className="proj-link">View Live Platform</div>
-          </div>
-        </a>
-
-        {/* MADEASME */}
-        <a href="https://madeasme.com" target="_blank" rel="noreferrer" className="proj-split" data-cursor="view">
-          <div className="proj-vis" style={{
-            background: `url('/made-as-me.png') center/cover no-repeat #110d07`
-          }}>
-            <div className="proj-vis-tag">Multi-Vendor</div>
-            <div className="proj-vis-url">madeasme.com</div>
-          </div>
-          <div className="proj-info">
-            <div>
-              <div className="proj-cat">Fashion E-Commerce · 2024</div>
-              <div className="proj-title">MADE<br />AS ME</div>
-              <p className="proj-sub">Discovery to checkout. Consumer app to ops dashboard. One connected ecosystem across 4 surfaces.</p>
-              <div className="proj-chips">
-                <span className="chip hi">4 Surfaces</span>
-                <span className="chip">POS + Mobile</span>
-                <span className="chip">Admin Dashboard</span>
-                <span className="chip">Multi-Vendor</span>
-              </div>
-            </div>
-            <div className="proj-link">View Project</div>
-          </div>
-        </a>
-
-        {/* VR TRAINING */}
-        <a href="#" className="proj-split" data-cursor="view">
-          <div className="proj-vis" style={{ background: `url('/made-as-me.png') center/cover no-repeat #050812` }}>
-            <div className="proj-vis-tag">Global Recognition</div>
-            <div className="proj-vis-url">Spatial UX · Industrial</div>
-          </div>
-          <div className="proj-info">
-            <div>
-              <div className="proj-cat">Spatial UX · VR · International Recognition</div>
-              <div className="proj-title">VR SAFETY<br />TRAINING</div>
-              <p className="proj-sub">Spatial UX for industrial safety. Real scenarios, real consequences. Built for decisions under pressure.</p>
-              <div className="proj-chips">
-                <span className="chip hi">🏆 International Award</span>
-                <span className="chip">Spatial / VR</span>
-                <span className="chip">3D Interactions</span>
-              </div>
-            </div>
-            <div className="proj-link">View Case Study</div>
-          </div>
-        </a>
-      </section>
-
       {/* PLAYGROUND */}
       <section id="playground" className="reveal playground-sec">
         <div className="sec-header">
@@ -378,9 +523,11 @@ function App() {
             <div className="play-video-wrap">
               <video autoPlay muted loop playsInline src="/Retro Portfolio.mov?v=2" style={{ width: '100%', height: '100%', objectFit: 'cover' }}></video>
             </div>
-            <h3 className="play-title">Retro Portfolio</h3>
-            <p className="play-sub">A nostalgic take on personal branding — CRT aesthetics, retro UI patterns, and analog warmth.</p>
-            <div className="play-link">Explore <span>→</span></div>
+            <div className="play-info">
+              <span className="made-by-chip">Made with Claude + Anti-Gravity</span>
+              <h3 className="play-title">Retro Portfolio</h3>
+              <p className="play-sub">A nostalgic take on personal branding — CRT aesthetics, retro UI patterns, and analog warmth.</p>
+            </div>
           </div>
 
           {/* Card 2 — Animated Portfolio */}
@@ -388,106 +535,19 @@ function App() {
             <div className="play-video-wrap">
               <video autoPlay muted loop playsInline src="/Animated Portfolio.mov?v=2" style={{ width: '100%', height: '100%', objectFit: 'cover' }}></video>
             </div>
-            <h3 className="play-title">Animated Portfolio</h3>
-            <p className="play-sub">Motion-driven experience design — fluid transitions, kinetic typography, and immersive scroll.</p>
-            <div className="play-link">Explore <span>→</span></div>
+            <div className="play-info">
+              <span className="made-by-chip">Made with Claude + Anti-Gravity</span>
+              <h3 className="play-title">Animated Portfolio</h3>
+              <p className="play-sub">Motion-driven experience design — fluid transitions, kinetic typography, and immersive scroll.</p>
+            </div>
           </div>
         </div>
       </section>
-
-      {/* EXPERIENCE */}
-      <section id="experience" className="reveal">
-        <div className="sec-header">
-          <div className="sec-eye">005 / Experience</div>
-          <div className="sec-big">Where I've<br />Worked</div>
-        </div>
-
-        {/* Row 01 — Job */}
-        <div className="exp-row">
-          <div className="exp-n">01</div>
-          <div className="exp-company">
-            <div className="exp-company-name">MONKHUB INNOVATIONS</div>
-            <div className="exp-company-loc">Gurugram, Haryana</div>
-            <hr className="exp-rule" />
-            <div className="exp-dates">May 2024 – Present</div>
-          </div>
-          <div className="exp-main">
-            <div className="exp-role">Product<br />Designer</div>
-            <p className="exp-bio">High-autonomy designer shipping production-ready products across e-commerce, legal tech, SaaS, VR, and retail — integrating AI into every layer of the process.</p>
-
-            {/* Responsibility bullets */}
-            <ul className="exp-bullets">
-              <li><span className="exp-dash">—</span><span>Owned <strong>end-to-end design</strong> for <strong>12+ shipped digital products</strong>, improving usability, engagement, and conversion across diverse platforms.</span></li>
-              <li><span className="exp-dash">—</span><span>Integrated <strong>Claude, ChatGPT, and MCPs</strong> for research synthesis, content generation, rapid prototyping, and UX copywriting — cutting <strong>iteration cycles significantly</strong>.</span></li>
-              <li><span className="exp-dash">—</span><span>Leveraged <strong>Figma Make</strong> to generate complete, production-grade UI screens through <strong>prompt engineering</strong> — enabling solo delivery of multi-feature platforms.</span></li>
-              <li><span className="exp-dash">—</span><span>Used <strong>Anti-Gravity, Stitch, and Flow</strong> to automate repetitive design operations and <strong>scale design system components</strong> across products.</span></li>
-              <li><span className="exp-dash">—</span><span>Architected <strong>scalable design systems</strong> that accelerated delivery speed and enforced <strong>UI consistency</strong> across platforms.</span></li>
-              <li><span className="exp-dash">—</span><span>Partnered with <strong>product managers and engineers</strong> to define problem spaces, shape solutions, and ship <strong>production-ready features</strong>.</span></li>
-            </ul>
-          </div>
-          <ul className="exp-pills">
-            <li>— 12+ Shipped Products</li>
-            <li>— AI-Integrated Workflow</li>
-            <li>— 6+ Industries</li>
-            <li>— 0→1 Ownership</li>
-          </ul>
-        </div>
-      </section>
-
-      {/* TOOLS */}
-      <section className="reveal">
-        <div className="sec-header">
-          <div className="sec-eye">006 / Stack</div>
-          <div className="sec-big">Tools</div>
-        </div>
-        <div className="tools-grid">
-          <div className="tc primary"><div className="tc-name">System Mapping</div><div className="tc-label">Architecture & Logic</div></div>
-          <div className="tc primary"><div className="tc-name">Claude</div><div className="tc-label">AI Research & UX Logic</div></div>
-          <div className="tc primary"><div className="tc-name">MCPs</div><div className="tc-label">Workflow Automation</div></div>
-          <div className="tc primary"><div className="tc-name">Anti-Gravity</div><div className="tc-label">AI Design Workflow</div></div>
-          <div className="tc"><div className="tc-name">Figma</div><div className="tc-label">Design Tool</div></div>
-          <div className="tc"><div className="tc-name">LLM Orchestration</div><div className="tc-label">Prompt-to-UI Flow</div></div>
-          <div className="tc"><div className="tc-name">UX Research</div><div className="tc-label">Human-in-the-loop</div></div>
-          <div className="tc"><div className="tc-name">Cursor</div><div className="tc-label">AI Code Assistant</div></div>
-          <div className="tc"><div className="tc-name">Framer</div><div className="tc-label">Website Builder</div></div>
-          <div className="tc"><div className="tc-name">Prototypes</div><div className="tc-label">Interaction Design</div></div>
-          <div className="tc"><div className="tc-name">Flow</div><div className="tc-label">Design Automation</div></div>
-          <div className="tc"><div className="tc-name">Notion</div><div className="tc-label">Productivity</div></div>
-        </div>
-      </section>
-
-      {/* ABOUT */}
-      <div className="about-split reveal" id="about">
-        <div className="about-photo" style={{ background: `url('/about-me.jpg') center/cover no-repeat` }}>
-        </div>
-        <div className="about-text">
-          <div className="about-bigname">ABHIMANYU<br />SAROHA</div>
-          <div className="about-role">AI-First Product Designer · India</div>
-          <p className="about-bio">
-            A product designer who's been <strong>quietly going AI-first before it was a buzzword.</strong><br /><br />
-            I design systems where AI amplifies human capabilities rather than replacing them. I build trust through explainable interfaces and seamless automation fallbacks.<br /><br />
-            <strong>I don't just use AI to design faster. I design the AI experience itself.</strong>
-          </p>
-          <div className="about-links">
-            <a href="https://www.linkedin.com/in/abhimanyusaroha/" target="_blank" rel="noreferrer" className="alink">LinkedIn</a>
-            <a href="https://www.behance.net/abhimanyusaroha" target="_blank" rel="noreferrer" className="alink">Behance</a>
-            <a href="https://dribbble.com/Saroha22" target="_blank" rel="noreferrer" className="alink">Dribbble</a>
-            <a href="https://abhimanyusarohaportfolio.framer.website" target="_blank" rel="noreferrer" className="alink">Portfolio</a>
-          </div>
-        </div>
-      </div >
-
-      <div className="about-stats reveal">
-        <div className="astat"><div className="astat-n">1.5+</div><div className="astat-l">Years Shipping</div></div>
-        <div className="astat"><div className="astat-n">12+</div><div className="astat-l">Live Products</div></div>
-        <div className="astat"><div className="astat-n">6+</div><div className="astat-l">Industries</div></div>
-        <div className="astat"><div className="astat-n dim">0</div><div className="astat-l">Design Handoff Friction</div></div>
-      </div>
 
       {/* FAQ */}
       <section className="reveal">
         <div className="sec-header">
-          <div className="sec-eye">007 / FAQ</div>
+          <div className="sec-eye">008 / FAQ</div>
           <div className="sec-big">Asked &amp;<br />Answered</div>
         </div>
         {[
@@ -545,7 +605,7 @@ function App() {
 
         {/* Center Content */}
         <div className="footer-center">
-          <div className="footer-eyebrow">008 / Let's work together</div>
+          <div className="footer-eyebrow">009 / Let's work together</div>
           <h2 className="footer-headline">
             <span className="footer-hl-outline">PIXELS</span>
             {' '}WITH PURPOSE
@@ -561,7 +621,7 @@ function App() {
         {/* Bottom Bar */}
         <div className="footer-bar">
           <div className="footer-bar-name">ABHIMANYU SAROHA</div>
-          <div className="footer-bar-copy">© 2025 — Designed by a human. Built with AI.</div>
+          <div className="footer-bar-copy">© 2026 — Designed by a human. Built with AI.</div>
           <div className="footer-bar-social">
             <a href="https://www.linkedin.com/in/abhimanyusaroha/" target="_blank" rel="noreferrer">IN</a>
             <a href="https://www.behance.net/abhimanyusaroha" target="_blank" rel="noreferrer">BE</a>
