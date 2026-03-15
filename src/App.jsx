@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import Lenis from 'lenis';
 import './index.css';
 import ThemeToggle from './components/ThemeToggle';
+import PreFooterMarquee from './components/PreFooterMarquee';
 
 function App() {
   const [openFaq, setOpenFaq] = useState(null);
@@ -587,6 +588,8 @@ function App() {
           </div>
         ))}
       </section>
+
+      <PreFooterMarquee />
 
       {/* FOOTER */}
       <footer className="footer-new" id="contact">
