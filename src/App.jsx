@@ -370,7 +370,7 @@ function App() {
           <div className="exp-company">
             <div className="exp-company-name">MONKHUB INNOVATIONS</div>
             <div className="exp-company-loc">Gurugram, Haryana</div>
-            <div className="exp-dates">May 2024 – Present</div>
+            <div className="exp-dates">May 2024 – March 2026</div>
             <hr className="exp-rule" />
           </div>
           <div className="exp-main">
