@@ -1,77 +1,109 @@
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useCallback } from "react";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
-import SplitType from "split-type";
 
 gsap.registerPlugin(ScrollTrigger);
 
+const SENTENCE = "PIXELS WITH PURPOSE. SYSTEMS WITH LOGIC. PRODUCTS THAT SHIP.";
+const ST_ID = "prefooter-letter-scroll";
+
 export default function PreFooterMarquee() {
     const sectionRef = useRef(null);
+    const innerRef = useRef(null);
     const trackRef = useRef(null);
-    const sentenceRef = useRef(null);
+    const textRef = useRef(null);
+    const charsRef = useRef([]);
+    const shapesRef = useRef([]);
+    const tlRef = useRef(null);
+    const shapeTweensRef = useRef([]);
 
-    useEffect(() => {
-        // Skip on mobile
-        if (window.innerWidth < 768) return;
+    // ── Build character spans ──────────────────────────────────
+    const chars = SENTENCE.split("").map((c, i) => (
+        <span
+            key={i}
+            ref={(el) => (charsRef.current[i] = el)}
+            className="pf-char"
+        >
+            {c === " " ? "\u00A0" : c}
+        </span>
+    ));
 
-        const slSection = sectionRef.current;
-        const slTrack = trackRef.current;
-        const slSentence = sentenceRef.current;
+    // ── Setup function (runs on mount & resize) ───────────────
+    const setup = useCallback(() => {
+        const section = sectionRef.current;
+        const inner = innerRef.current;
+        const track = trackRef.current;
+        const charEls = charsRef.current.filter(Boolean);
 
-        if (!slSection || !slTrack || !slSentence) return;
+        if (!section || !inner || !track || charEls.length === 0) return;
 
-        const typeSplit = new SplitType(slSentence, {
-            types: "words, chars",
-            tagName: "span",
-        });
+        // ── Reduced motion check ──────────────────────────────
+        const prefersReduced = window.matchMedia(
+            "(prefers-reduced-motion: reduce)"
+        ).matches;
 
-        const chars = Array.from(slSentence.querySelectorAll(".char"));
+        if (prefersReduced) {
+            section.style.height = "auto";
+            gsap.set(track, { x: 0 });
+            gsap.set(charEls, { clearProps: "all" });
+            section.classList.add("pf-reduced");
+            return;
+        }
 
-        // Measure travel distance
-        const trackWidth = slTrack.scrollWidth;
+        section.classList.remove("pf-reduced");
+
+        // ── Mobile check ──────────────────────────────────────
+        const isMobile = window.innerWidth < 768;
+        if (isMobile) {
+            section.style.height = "auto";
+            gsap.set(track, { x: 0 });
+            gsap.set(charEls, { clearProps: "all" });
+            return;
+        }
+
+        // ── Measurements ──────────────────────────────────────
         const viewW = window.innerWidth;
+        const trackWidth = track.scrollWidth;
+        const startX = viewW;
+        const endX = -trackWidth;
+        const travel = Math.abs(endX - startX);
 
-        // Text starts fully off the right edge, exits fully off the left
-        const startX = viewW * 1.05;
-        const endX = -(trackWidth - viewW * 0.1);
-        const totalTravel = Math.abs(endX - startX);
+        // Section height = 1 viewport (for pin) + travel distance
+        section.style.height = `${travel}px`;
 
-        // Set section height to exact travel distance — zero dead scroll
-        const scrollDistance = totalTravel * 0.95;
-        slSection.style.height = `calc(100vh + ${scrollDistance}px)`;
+        // Initial position: off-screen right
+        gsap.set(track, { x: startX });
 
-        // Position track at start (off right edge)
-        gsap.set(slTrack, { x: startX });
-
-        // ─── STEP 3: Per-character tilt and squash ────────────────
-        chars.forEach((char, i) => {
-            const tilt = i % 2 === 0 ? -6 : 6;
-            const squash = i % 3 === 0 ? 0.75 : 0.88;
-
+        // ── Initial char state ────────────────────────────────
+        charEls.forEach((char) => {
             gsap.set(char, {
-                y: 120,
-                opacity: 0,
-                rotation: tilt,
-                scaleY: squash,
-                transformOrigin: "bottom center",
+                opacity: 0.18,
+                yPercent: 14,
+                xPercent: 6,
+                skewX: 8,
+                filter: "blur(6px)",
+                willChange: "transform, opacity, filter",
             });
         });
 
-        // ─── MAIN TIMELINE ────────────────────────────────────────
+        // ── Main timeline ─────────────────────────────────────
         const tl = gsap.timeline({
             scrollTrigger: {
-                trigger: slSection,
+                trigger: section,
                 start: "top top",
-                end: () => `+=${scrollDistance}`,
-                scrub: 3,
-                pin: false,
+                end: () => `+=${travel}`,
+                scrub: 1,
+                pin: true,
+                pinSpacing: true,
+                id: ST_ID,
                 invalidateOnRefresh: true,
+                anticipatePin: 1,
             },
         });
 
-        // 1. Slide entire track from right to left
+        // 1. Horizontal slide
         tl.to(
-            slTrack,
+            track,
             {
                 x: endX,
                 ease: "none",
@@ -80,48 +112,143 @@ export default function PreFooterMarquee() {
             0
         );
 
-        // ─── STEP 2: Fixed stagger so every letter completes ──────
-        const STAGGER_WINDOW = 0.62;
-        const CHAR_DURATION = 0.38;
-        const staggerEach = STAGGER_WINDOW / Math.max(chars.length - 1, 1);
+        // 2. Letter-level reveal (staggered)
+        const STAGGER_WINDOW = 0.70;
+        const CHAR_DURATION = 0.30;
+        const staggerEach = STAGGER_WINDOW / Math.max(charEls.length - 1, 1);
 
         tl.to(
-            chars,
+            charEls,
             {
-                y: 0,
                 opacity: 1,
-                rotation: 0,
-                scaleY: 1,
-                ease: "elastic.out(1.2, 0.45)",
+                yPercent: 0,
+                xPercent: 0,
+                skewX: 0,
+                filter: "blur(0px)",
+                ease: "power2.out",
                 stagger: {
                     each: staggerEach,
                     from: "start",
                 },
                 duration: CHAR_DURATION,
-                onComplete: () => {
-                    gsap.set(chars, { clearProps: "transform,opacity" });
-                },
             },
-            0
+            0.02 // tiny entry buffer
         );
 
-        // ─── CLEANUP ──────────────────────────────────────────────
-        return () => {
-            ScrollTrigger.getAll().forEach((st) => {
-                if (st.vars?.trigger === slSection) st.kill();
+        tlRef.current = tl;
+
+        // ── Floating shapes animation ─────────────────────────
+        const shapeEls = shapesRef.current.filter(Boolean);
+        const tweens = [];
+
+        shapeEls.forEach((shape, i) => {
+            const yRange = 6 + Math.random() * 12;
+            const rotRange = 6;
+            const dur = 6 + Math.random() * 8;
+
+            const t1 = gsap.to(shape, {
+                y: `+=${yRange}`,
+                rotation: rotRange * (i % 2 === 0 ? 1 : -1),
+                duration: dur,
+                ease: "sine.inOut",
+                repeat: -1,
+                yoyo: true,
             });
-            tl.kill();
-            typeSplit.revert();
-        };
+
+            const t2 = gsap.to(shape, {
+                opacity: 0.04 + Math.random() * 0.06,
+                duration: dur * 0.7,
+                ease: "sine.inOut",
+                repeat: -1,
+                yoyo: true,
+            });
+
+            tweens.push(t1, t2);
+        });
+
+        shapeTweensRef.current = tweens;
+
     }, []);
 
+    // ── Lifecycle ─────────────────────────────────────────────
+    useEffect(() => {
+        // Kill previous instance if any
+        ScrollTrigger.getById(ST_ID)?.kill();
+        tlRef.current?.kill();
+        shapeTweensRef.current.forEach((t) => t.kill());
+
+        // Small delay to let DOM paint
+        const raf = requestAnimationFrame(() => {
+            setup();
+        });
+
+        // ── ResizeObserver for recalc ─────────────────────────
+        let resizeTimeout;
+        const ro = new ResizeObserver(() => {
+            clearTimeout(resizeTimeout);
+            resizeTimeout = setTimeout(() => {
+                ScrollTrigger.getById(ST_ID)?.kill();
+                tlRef.current?.kill();
+                shapeTweensRef.current.forEach((t) => t.kill());
+                setup();
+            }, 200);
+        });
+
+        if (sectionRef.current) ro.observe(sectionRef.current);
+
+        // ── Cleanup ───────────────────────────────────────────
+        return () => {
+            cancelAnimationFrame(raf);
+            clearTimeout(resizeTimeout);
+            ro.disconnect();
+            ScrollTrigger.getById(ST_ID)?.kill();
+            tlRef.current?.kill();
+            shapeTweensRef.current.forEach((t) => t.kill());
+            gsap.killTweensOf(charsRef.current.filter(Boolean));
+            gsap.killTweensOf(shapesRef.current.filter(Boolean));
+        };
+    }, [setup]);
+
     return (
-        <section ref={sectionRef} className="sl-section">
-            <div className="sl-sticky">
-                <div ref={trackRef} className="sl-track">
-                    <p ref={sentenceRef} className="sl-sentence">
-                        PIXELS WITH PURPOSE. SYSTEMS WITH LOGIC. PRODUCTS THAT SHIP.
-                    </p>
+        <section
+            ref={sectionRef}
+            className="pf-marquee"
+            aria-label="Pre-footer statement: Pixels with purpose. Systems with logic. Products that ship."
+        >
+            <div ref={innerRef} className="pf-inner">
+                {/* Floating background shapes */}
+                <div className="pf-shapes" aria-hidden="true">
+                    <div
+                        ref={(el) => (shapesRef.current[0] = el)}
+                        className="pf-shape pf-shape-1"
+                    />
+                    <div
+                        ref={(el) => (shapesRef.current[1] = el)}
+                        className="pf-shape pf-shape-2"
+                    />
+                    <div
+                        ref={(el) => (shapesRef.current[2] = el)}
+                        className="pf-shape pf-shape-3"
+                    />
+                    <div
+                        ref={(el) => (shapesRef.current[3] = el)}
+                        className="pf-shape pf-shape-4"
+                    />
+                    <div
+                        ref={(el) => (shapesRef.current[4] = el)}
+                        className="pf-shape pf-shape-5"
+                    />
+                </div>
+
+                {/* Track with text */}
+                <div ref={trackRef} className="pf-track">
+                    <h2
+                        ref={textRef}
+                        className="pf-text"
+                        aria-hidden="true"
+                    >
+                        {chars}
+                    </h2>
                 </div>
             </div>
         </section>

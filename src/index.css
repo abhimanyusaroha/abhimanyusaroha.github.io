@@ -3979,80 +3979,184 @@ button:hover,
 }
 
 /* ═══════════════════════════
-   SCROLL LETTER SECTION
+   PRE-FOOTER MARQUEE (v2)
+   Letter-level reveal + floating shapes
 ═══════════════════════════ */
-.sl-section {
+.pf-marquee {
     position: relative;
-    background: var(--bg);
-}
-
-.sl-sticky {
-    position: sticky;
-    top: 0;
-    height: 100vh;
     width: 100%;
-    display: flex;
-    align-items: center;
     overflow: hidden;
     background: var(--bg);
+    color: var(--black);
 }
 
-.sl-track {
+.pf-inner {
+    min-height: 100vh;
     display: flex;
     align-items: center;
+    justify-content: flex-start;
     position: relative;
 }
 
-.sl-sentence {
-    font-family: 'DM Sans', sans-serif;
-    font-size: clamp(100px, 14vw, 200px);
-    font-weight: 800;
-    color: var(--black);
+.pf-track {
     white-space: nowrap;
+    will-change: transform;
+    padding-inline: 6vw;
+    position: relative;
+    z-index: 2;
+}
+
+.pf-text {
+    font-family: 'DM Sans', sans-serif;
+    font-weight: 900;
+    text-transform: uppercase;
+    line-height: 0.92;
+    letter-spacing: -0.03em;
+    font-size: clamp(80px, 12vw, 180px);
     margin: 0;
-    padding: 0 10vw;
-    letter-spacing: -0.04em;
-    line-height: 0.95;
+    display: inline-block;
+    color: var(--black);
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
 }
 
-.sl-sentence .word {
+.pf-char {
     display: inline-block;
-    overflow: visible;
-    margin-right: 0.2em;
-}
-
-.sl-sentence .char {
-    display: inline-block;
+    will-change: transform, opacity, filter;
     -webkit-font-smoothing: antialiased;
     backface-visibility: hidden;
-    transform-origin: bottom center;
 }
 
+/* ── Floating shapes ────────────────── */
+.pf-shapes {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    z-index: 0;
+    overflow: hidden;
+}
+
+.pf-shape {
+    position: absolute;
+    will-change: transform, opacity;
+}
+
+.pf-shape-1 {
+    width: 140px;
+    height: 2px;
+    border-radius: 2px;
+    background: currentColor;
+    opacity: 0.06;
+    top: 18%;
+    left: 12%;
+    transform-origin: center;
+}
+
+.pf-shape-2 {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    background: currentColor;
+    opacity: 0.05;
+    top: 30%;
+    right: 16%;
+}
+
+.pf-shape-3 {
+    width: 18px;
+    height: 18px;
+    border-radius: 3px;
+    border: 1.5px solid currentColor;
+    opacity: 0.05;
+    bottom: 22%;
+    left: 28%;
+}
+
+.pf-shape-4 {
+    width: 80px;
+    height: 1px;
+    background: currentColor;
+    opacity: 0.04;
+    bottom: 32%;
+    right: 22%;
+    transform: rotate(-12deg);
+    transform-origin: center;
+}
+
+.pf-shape-5 {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: currentColor;
+    opacity: 0.06;
+    top: 60%;
+    left: 62%;
+}
+
+/* ── Reduced motion fallback ──────── */
+.pf-reduced {
+    height: auto !important;
+}
+
+.pf-reduced .pf-inner {
+    justify-content: center;
+    padding: 80px 24px;
+}
+
+.pf-reduced .pf-track {
+    white-space: normal;
+}
+
+.pf-reduced .pf-text {
+    white-space: normal;
+    text-align: center;
+}
+
+.pf-reduced .pf-char {
+    opacity: 1 !important;
+    filter: none !important;
+    transform: none !important;
+}
+
+/* ── Mobile ───────────────────────── */
 @media (max-width: 768px) {
-    .sl-section {
+    .pf-marquee {
         height: auto !important;
-        padding: 80px 24px;
+        padding: 60px 24px;
     }
 
-    .sl-sticky {
-        position: relative;
-        height: auto;
-        overflow: visible;
+    .pf-inner {
+        min-height: auto;
+        justify-content: center;
     }
 
-    .sl-sentence {
+    .pf-track {
         white-space: normal;
-        font-size: clamp(48px, 12vw, 72px);
-        padding: 0;
-        line-height: 1.1;
-        font-weight: 800;
-        letter-spacing: -0.03em;
+        padding-inline: 0;
     }
 
-    .sl-sentence .char,
-    .sl-sentence .word {
-        display: inline;
+    .pf-text {
+        white-space: normal;
+        font-size: clamp(40px, 11vw, 64px);
+        line-height: 1.1;
+        letter-spacing: -0.02em;
+    }
+
+    .pf-char {
+        will-change: auto;
+        opacity: 1 !important;
+        filter: none !important;
+        transform: none !important;
+    }
+
+    .pf-shapes {
+        display: none;
+    }
+}
+
+/* ── Small phones ─────────────────── */
+@media (max-width: 420px) {
+    .pf-text {
+        font-size: clamp(32px, 10vw, 48px);
     }
 }
