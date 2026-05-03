@@ -4,15 +4,27 @@
     margin: 0;
     padding: 0;
     box-sizing: border-box;
+}
+
+
+/* Theme-change transitions on key elements only */
+body,
+nav,
+.proj-vis,
+.proj-info,
+.hstat,
+.tc,
+.svc-row,
+.faq-item,
+.about-split,
+.about-stats,
+.chip,
+.btn,
+footer {
     transition:
         background-color 0.4s ease,
         color 0.3s ease,
-        border-color 0.3s ease,
-        box-shadow 0.3s ease;
-}
-
-html {
-    scroll-behavior: smooth;
+        border-color 0.3s ease;
 }
 
 :root {
@@ -53,6 +65,9 @@ body {
     font-family: 'Barlow', sans-serif;
     font-weight: 300;
     overflow-x: hidden;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    text-rendering: optimizeSpeed;
 }
 
 /* GRAIN */
@@ -60,9 +75,10 @@ body::after {
     content: '';
     position: fixed;
     inset: 0;
-    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 512 512' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.72' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.025'/%3E%3C/svg%3E");
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 512 512' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.72' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.02'/%3E%3C/svg%3E");
     pointer-events: none;
     z-index: 9998;
+    /* No will-change — it never animates, promotion wastes GPU memory */
 }
 
 /* ═══════════════════════════
@@ -70,33 +86,38 @@ body::after {
 ═══════════════════════════ */
 #cur-dot {
     position: fixed;
+    left: 0;
+    top: 0;
     width: 6px;
     height: 6px;
     background: var(--white);
     border-radius: 50%;
     pointer-events: none;
     z-index: 9999;
-    transform: translate(-50%, -50%);
-    transition: opacity .15s, transform .1s;
-    will-change: left, top;
+    margin-left: -3px;
+    margin-top: -3px;
+    transition: opacity .15s;
+    will-change: transform;
     mix-blend-mode: difference;
 }
 
 #cur-ring {
     position: fixed;
+    left: 0;
+    top: 0;
     width: 32px;
     height: 32px;
     border: 1.5px solid rgba(255, 255, 255, .6);
     border-radius: 50%;
     pointer-events: none;
     z-index: 9997;
-    transform: translate(-50%, -50%);
-    /* centered text inside ring */
+    margin-left: -16px;
+    margin-top: -16px;
     display: flex;
     align-items: center;
     justify-content: center;
     transition: width .3s ease, height .3s ease, background .25s, border-color .25s;
-    will-change: left, top;
+    will-change: transform;
     mix-blend-mode: difference;
 }
 
@@ -207,10 +228,12 @@ nav {
     padding: 0 48px;
     height: 56px;
     border-bottom: 1px solid var(--rule);
+    /* Solid bg — backdrop-filter:blur is expensive during scroll */
     background: var(--nav-bg);
-    backdrop-filter: blur(12px);
     opacity: 0;
     animation: fadeIn .4s ease 2s forwards;
+    /* Own compositing layer — avoids repaints from scroll below it */
+    transform: translateZ(0);
 }
 
 @keyframes fadeIn {
@@ -477,7 +500,8 @@ nav {
     cursor: pointer;
     text-decoration: none;
     width: fit-content;
-    transition: all 0.25s ease;
+    /* Avoid transition:all — animates every property including layout ones */
+    transition: border-color 0.2s ease, color 0.2s ease, opacity 0.2s ease;
     opacity: 0;
     animation: fadeUp .5s ease .9s forwards;
 }
@@ -754,6 +778,8 @@ nav {
     display: inline-flex;
     /* Never pause on hover — only color changes */
     animation: ticker 32s linear infinite;
+    will-change: transform;
+    transform: translateZ(0);
 }
 
 .marquee-item {
@@ -1234,12 +1260,15 @@ nav {
     /* triggers if using background-size */
 }
 
+/* Pre-promote the bg div so scale doesn't cause a mid-hover layer promotion stutter */
 .proj-vis>[style*="background"] {
-    transition: transform .6s cubic-bezier(.4, 0, .2, 1);
+    transition: transform .5s cubic-bezier(.4, 0, .2, 1);
+    will-change: transform;
+    transform: translateZ(0);
 }
 
 .proj-split:hover .proj-vis>[style*="background"] {
-    transform: scale(1.03);
+    transform: scale(1.03) translateZ(0);
 }
 
 .proj-split.flip .proj-vis {
@@ -2091,8 +2120,8 @@ nav {
 ═══════════════════════════ */
 .reveal>* {
     opacity: 0;
-    transform: translateY(24px);
-    transition: opacity 0.7s cubic-bezier(0.22, 1, 0.36, 1), transform 0.7s cubic-bezier(0.22, 1, 0.36, 1);
+    transform: translateY(20px);
+    transition: opacity 0.55s cubic-bezier(0.22, 1, 0.36, 1), transform 0.55s cubic-bezier(0.22, 1, 0.36, 1);
 }
 
 .reveal.in>* {
@@ -3979,184 +4008,44 @@ button:hover,
 }
 
 /* ═══════════════════════════
-   PRE-FOOTER MARQUEE (v2)
-   Letter-level reveal + floating shapes
+   PERFORMANCE — CONTAIN
+   Isolate layout/style per section so the
+   browser reflows only the changed section,
+   not the whole page.
 ═══════════════════════════ */
-.pf-marquee {
-    position: relative;
-    width: 100%;
-    overflow: hidden;
-    background: var(--bg);
-    color: var(--black);
+section,
+.about-split,
+.about-stats,
+.marquee-wrap,
+.footer-new {
+    contain: layout style;
 }
 
-.pf-inner {
-    min-height: 100vh;
-    display: flex;
-    align-items: center;
-    justify-content: flex-start;
-    position: relative;
-}
-
-.pf-track {
-    white-space: nowrap;
-    will-change: transform;
-    padding-inline: 6vw;
-    position: relative;
-    z-index: 2;
-}
-
-.pf-text {
-    font-family: 'DM Sans', sans-serif;
-    font-weight: 900;
-    text-transform: uppercase;
-    line-height: 0.92;
-    letter-spacing: -0.03em;
-    font-size: clamp(80px, 12vw, 180px);
-    margin: 0;
-    display: inline-block;
-    color: var(--black);
-    -webkit-font-smoothing: antialiased;
-    -moz-osx-font-smoothing: grayscale;
-}
-
-.pf-char {
-    display: inline-block;
-    will-change: transform, opacity, filter;
-    -webkit-font-smoothing: antialiased;
-    backface-visibility: hidden;
-}
-
-/* ── Floating shapes ────────────────── */
-.pf-shapes {
-    position: absolute;
-    inset: 0;
-    pointer-events: none;
-    z-index: 0;
-    overflow: hidden;
-}
-
-.pf-shape {
-    position: absolute;
-    will-change: transform, opacity;
-}
-
-.pf-shape-1 {
-    width: 140px;
-    height: 2px;
-    border-radius: 2px;
-    background: currentColor;
-    opacity: 0.06;
-    top: 18%;
-    left: 12%;
-    transform-origin: center;
-}
-
-.pf-shape-2 {
-    width: 10px;
-    height: 10px;
-    border-radius: 50%;
-    background: currentColor;
-    opacity: 0.05;
-    top: 30%;
-    right: 16%;
-}
-
-.pf-shape-3 {
-    width: 18px;
-    height: 18px;
-    border-radius: 3px;
-    border: 1.5px solid currentColor;
-    opacity: 0.05;
-    bottom: 22%;
-    left: 28%;
-}
-
-.pf-shape-4 {
-    width: 80px;
-    height: 1px;
-    background: currentColor;
-    opacity: 0.04;
-    bottom: 32%;
-    right: 22%;
-    transform: rotate(-12deg);
-    transform-origin: center;
-}
-
-.pf-shape-5 {
-    width: 6px;
-    height: 6px;
-    border-radius: 50%;
-    background: currentColor;
-    opacity: 0.06;
-    top: 60%;
-    left: 62%;
-}
-
-/* ── Reduced motion fallback ──────── */
-.pf-reduced {
-    height: auto !important;
-}
-
-.pf-reduced .pf-inner {
-    justify-content: center;
-    padding: 80px 24px;
-}
-
-.pf-reduced .pf-track {
-    white-space: normal;
-}
-
-.pf-reduced .pf-text {
-    white-space: normal;
-    text-align: center;
-}
-
-.pf-reduced .pf-char {
-    opacity: 1 !important;
-    filter: none !important;
-    transform: none !important;
-}
-
-/* ── Mobile ───────────────────────── */
-@media (max-width: 768px) {
-    .pf-marquee {
-        height: auto !important;
-        padding: 60px 24px;
+/* ═══════════════════════════
+   ACCESSIBILITY — REDUCED MOTION
+   Disable all animations/transitions for users
+   who have "Reduce Motion" enabled in OS settings.
+═══════════════════════════ */
+@media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+        scroll-behavior: auto !important;
     }
 
-    .pf-inner {
-        min-height: auto;
-        justify-content: center;
+    .marquee-track {
+        animation: none !important;
     }
 
-    .pf-track {
-        white-space: normal;
-        padding-inline: 0;
+    .footer-marquee-track {
+        animation: none !important;
     }
 
-    .pf-text {
-        white-space: normal;
-        font-size: clamp(40px, 11vw, 64px);
-        line-height: 1.1;
-        letter-spacing: -0.02em;
-    }
-
-    .pf-char {
-        will-change: auto;
-        opacity: 1 !important;
-        filter: none !important;
-        transform: none !important;
-    }
-
-    .pf-shapes {
-        display: none;
-    }
-}
-
-/* ── Small phones ─────────────────── */
-@media (max-width: 420px) {
-    .pf-text {
-        font-size: clamp(32px, 10vw, 48px);
+    #welcome {
+        animation: none !important;
+        opacity: 0 !important;
     }
 }

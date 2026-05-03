@@ -1,14 +1,12 @@
-import React, { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 
 const ThemeToggle = () => {
-    const [theme, setTheme] = useState(localStorage.getItem('theme') || 'light');
+    const [theme, setTheme] = useState('light');
 
     useEffect(() => {
-        const saved = localStorage.getItem('theme');
-        const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-        const initialTheme = saved || (prefersDark ? 'dark' : 'light');
-        setTheme(initialTheme);
-        document.documentElement.setAttribute('data-theme', initialTheme);
+        const saved = localStorage.getItem('theme') || 'light';
+        setTheme(saved);
+        document.documentElement.setAttribute('data-theme', saved);
     }, []);
 
     const toggleTheme = () => {

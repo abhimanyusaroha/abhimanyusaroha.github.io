@@ -1,12 +1,148 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useLayoutEffect, useRef, useState } from 'react';
+import gsap from 'gsap';
+import { ScrollTrigger } from 'gsap/ScrollTrigger';
+gsap.registerPlugin(ScrollTrigger);
 import Lenis from 'lenis';
 import './index.css';
 import ThemeToggle from './components/ThemeToggle';
-import PreFooterMarquee from './components/PreFooterMarquee';
+
 
 function App() {
   const [openFaq, setOpenFaq] = useState(null);
   const [menuOpen, setMenuOpen] = useState(false);
+  const heroRef = useRef(null);
+
+  useLayoutEffect(() => {
+    const WORDS = {
+      '.hl-line1': 'PIXELS',
+      '.hl-word2': 'WITH',
+      '.hl-line3': 'PURPOSE',
+    };
+
+    function buildChars(selector) {
+      const el = document.querySelector(selector);
+      if (!el) return [];
+      const text = WORDS[selector];
+      el.innerHTML = '';
+      el.style.display = 'flex';
+      el.style.alignItems = 'flex-end';
+      return text.split('').map((ch) => {
+        const wrap = document.createElement('span');
+        wrap.style.cssText =
+          'display:inline-block;overflow:hidden;line-height:0.92;vertical-align:bottom;';
+        const inner = document.createElement('span');
+        inner.style.cssText =
+          'display:inline-block;transform-origin:50% 100%;will-change:transform;';
+        inner.textContent = ch;
+        wrap.appendChild(inner);
+        el.appendChild(wrap);
+        return inner;
+      });
+    }
+
+    const c1 = buildChars('.hl-line1');
+    const c2 = buildChars('.hl-word2');
+    const c3 = buildChars('.hl-line3');
+
+    if (!c1.length || !c2.length || !c3.length) return;
+
+    const allChars = [...c1, ...c2, ...c3];
+
+    gsap.set(allChars, {
+      y: '115%',
+      rotationX: -80,
+      opacity: 0,
+      transformPerspective: 500,
+    });
+
+    allChars.forEach((c) => {
+      gsap.set(c, { rotation: (Math.random() - 0.5) * 20 });
+    });
+
+    gsap.set('#nav',             { y: -26, opacity: 0 });
+    gsap.set('.hero-meta',       { y: 10,  opacity: 0 });
+    gsap.set('.star-icon',       { scale: 0, rotation: -160, opacity: 0, transformOrigin: '50% 50%' });
+    gsap.set('.hl-intro',        { y: 18,  opacity: 0 });
+    gsap.set('.hero-resume-btn', { y: 12,  opacity: 0 });
+    gsap.set('.hstat',           { y: 18,  opacity: 0 });
+    gsap.set('.btn',             { y: 12,  opacity: 0 });
+
+    const tl = gsap.timeline();
+
+    tl.to('#nav', { y: 0, opacity: 1, duration: 0.65, ease: 'power3.out' }, 0)
+
+      .to('.hero-meta', {
+        y: 0, opacity: 1,
+        duration: 0.5,
+        stagger: 0.1,
+        ease: 'power2.out',
+      }, 0.12)
+
+      .to(c1, {
+        y: '0%', rotationX: 0, rotation: 0, opacity: 1,
+        duration: 0.72,
+        stagger: { each: 0.06, ease: 'power1.inOut' },
+        ease: 'back.out(2.5)',
+      }, 0.3)
+
+      .to('.star-icon', {
+        scale: 1, rotation: 0, opacity: 1,
+        duration: 1.2,
+        ease: 'elastic.out(1.1, 0.38)',
+      }, 0.3)
+
+      .to(c2, {
+        y: '0%', rotationX: 0, rotation: 0, opacity: 1,
+        duration: 0.78,
+        stagger: { each: 0.07, ease: 'power1.inOut' },
+        ease: 'back.out(2.8)',
+      }, 0.78)
+
+      .to(c3, {
+        y: '0%', rotationX: 0, rotation: 0, opacity: 1,
+        duration: 0.75,
+        stagger: { each: 0.042, ease: 'power1.in' },
+        ease: 'back.out(2.2)',
+      }, 1.22)
+
+      .to('.hl-intro',        { y: 0, opacity: 1, duration: 0.55, ease: 'power2.out' }, 1.35)
+      .to('.hero-resume-btn', { y: 0, opacity: 1, duration: 0.42, ease: 'power2.out' }, 1.5)
+
+      .to('.hstat', {
+        y: 0, opacity: 1,
+        duration: 0.58,
+        stagger: 0.1,
+        ease: 'back.out(2)',
+      }, 1.58)
+
+      .to('.btn', {
+        y: 0, opacity: 1,
+        duration: 0.44,
+        stagger: 0.09,
+        ease: 'back.out(1.8)',
+      }, 1.78);
+
+    gsap.to('.star-icon', {
+      rotation: 360,
+      duration: 9,
+      repeat: -1,
+      ease: 'none',
+      delay: 1.7,
+    });
+
+    return () => {
+      tl.kill();
+      gsap.killTweensOf('.star-icon');
+      ['.hl-line1', '.hl-word2', '.hl-line3'].forEach((sel) => {
+        const el = document.querySelector(sel);
+        if (el) {
+          el.innerHTML = WORDS[sel];
+          el.style.display = '';
+          el.style.alignItems = '';
+        }
+      });
+    };
+  }, []);
 
   useEffect(() => {
     // Cursor logic
@@ -22,12 +158,8 @@ function App() {
     const loop = () => {
       rx += (mx - rx) * 0.1;
       ry += (my - ry) * 0.1;
-      if (dot && ring) {
-        dot.style.left = mx + 'px';
-        dot.style.top = my + 'px';
-        ring.style.left = rx + 'px';
-        ring.style.top = ry + 'px';
-      }
+      if (dot) dot.style.transform = `translate3d(${mx}px,${my}px,0)`;
+      if (ring) ring.style.transform = `translate3d(${rx}px,${ry}px,0)`;
       reqId = requestAnimationFrame(loop);
     };
     reqId = requestAnimationFrame(loop);
@@ -54,21 +186,22 @@ function App() {
     window.addEventListener('scroll', onScroll, { passive: true });
 
     // ─── Lenis smooth scroll ──────────────────────────────────────────────
+    // duration 0.6 = near-native, barely noticeable smoothing
+    const easeOut = (t) => 1 - Math.pow(1 - t, 2);  // Quadratic ease-out — very light
     const lenis = new Lenis({
-      duration: 1.8,           // How long the inertia scroll lasts (seconds)
-      easing: (t) => Math.min(1, 1.001 - Math.pow(2, -10 * t)), // Expo ease-out
+      duration: 0.6,
+      easing: easeOut,
       smooth: true,
-      smoothTouch: false,      // Keep native touch on mobile
-      touchMultiplier: 2,
+      smoothTouch: false,
+      touchMultiplier: 1.0,
+      wheelMultiplier: 1.0,
     });
 
-    // Hook Lenis into requestAnimationFrame
-    let lenisRafId;
-    const lenisRaf = (time) => {
-      lenis.raf(time);
-      lenisRafId = requestAnimationFrame(lenisRaf);
-    };
-    lenisRafId = requestAnimationFrame(lenisRaf);
+    // Store ticker fn so cleanup can unregister the exact same reference
+    const tickerFn = (time) => lenis.raf(time * 1000);
+    gsap.ticker.add(tickerFn);
+    gsap.ticker.lagSmoothing(0);
+    lenis.on('scroll', ScrollTrigger.update);
 
     // Intercept anchor clicks and use Lenis.scrollTo
     const handleAnchorClick = (e) => {
@@ -79,7 +212,7 @@ function App() {
       const target = document.getElementById(id);
       if (!target) return;
       e.preventDefault();
-      lenis.scrollTo(target, { duration: 2.0, easing: (t) => Math.min(1, 1.001 - Math.pow(2, -10 * t)) });
+      lenis.scrollTo(target, { duration: 1.4, easing: easeOut });
     };
 
     document.addEventListener('click', handleAnchorClick);
@@ -90,7 +223,7 @@ function App() {
       cancelAnimationFrame(reqId);
       window.removeEventListener('scroll', onScroll);
       document.removeEventListener('click', handleAnchorClick);
-      cancelAnimationFrame(lenisRafId);
+      gsap.ticker.remove(tickerFn);
       lenis.destroy();
       io.disconnect();
     };
@@ -154,7 +287,7 @@ function App() {
       <div id="cur-ring"><span id="cur-label">VIEW</span></div>
 
       {/* NAV */}
-      <nav id="nav">
+      <nav id="nav" data-nav>
         <a className="nav-logo" href="#">ABHIMANYU <em>SAROHA</em></a>
 
         {/* Desktop Links */}
@@ -191,54 +324,54 @@ function App() {
       </div>
 
       {/* HERO */}
-      <section className="hero">
+      <section className="hero" ref={heroRef}>
         <div className="hero-meta-row">
-          <span className="hero-meta">Product Designer · India · 2026</span>
-          <span className="hero-meta">001 / Intro</span>
+          <span className="hero-meta" data-meta-left>Product Designer · India · 2026</span>
+          <span className="hero-meta" data-meta-right>001 / Intro</span>
         </div>
 
         <div className="hero-hl-block">
           <div className="hl-top">
-            <span className="star-icon">✻</span>
-            <span className="hl-line1">PIXELS</span>
+            <span className="star-icon" data-flower>✻</span>
+            <span className="hl-line1" data-hero-line="pixels">PIXELS</span>
           </div>
           <div className="hl-middle-left">
-            <p className="hl-intro">
+            <p className="hl-intro" data-subtext>
               Hi, I'm Abhimanyu. I design products that ship fast because I don't work like it's 2020 anymore.
               <br /><span style={{ color: 'var(--muted)' }}>Faster than your last agency. Cheaper than your next hire.</span>
             </p>
-            <a href="https://drive.google.com/file/d/14hs7C0MBlUkLx9UE76gZtUHloqJWA8zL/view?usp=sharing" target="_blank" rel="noopener noreferrer" className="hero-resume-btn">
+            <a href="https://drive.google.com/file/d/14hs7C0MBlUkLx9UE76gZtUHloqJWA8zL/view?usp=sharing" target="_blank" rel="noopener noreferrer" className="hero-resume-btn" data-resume-btn>
               <span className="hero-resume-arrow">↓</span> DOWNLOAD RÉSUMÉ
             </a>
           </div>
           <div className="hl-middle-right">
-            <span className="hl-word2">WITH</span>
+            <span className="hl-word2" data-hero-line="with">WITH</span>
           </div>
           <div className="hl-bottom">
-            <span className="hl-line3">PURPOSE</span>
+            <span className="hl-line3" data-hero-line="purpose">PURPOSE</span>
           </div>
         </div>
 
         <div className="hero-bottom">
           <div className="hero-stats-row">
-            <div className="hstat">
-              <span className="hstat-n">1.5+</span>
+            <div className="hstat" data-stat>
+              <span className="hstat-n" data-stat-number="1.5">1.5+</span>
               <span className="hstat-l">Years Shipping</span>
             </div>
             <div className="hstat-divider"></div>
-            <div className="hstat">
-              <span className="hstat-n">12+</span>
+            <div className="hstat" data-stat>
+              <span className="hstat-n" data-stat-number="12">12+</span>
               <span className="hstat-l">Products Worked On</span>
             </div>
             <div className="hstat-divider"></div>
-            <div className="hstat">
-              <span className="hstat-n">6+</span>
+            <div className="hstat" data-stat>
+              <span className="hstat-n" data-stat-number="6">6+</span>
               <span className="hstat-l">Industries</span>
             </div>
           </div>
           <div className="hero-cta">
-            <a href="#works" className="btn btn-fill"><span>View Work</span></a>
-            <a href="#contact" className="btn btn-ghost">Let's Talk</a>
+            <a href="#works" className="btn btn-fill" data-cta><span>View Work</span></a>
+            <a href="#contact" className="btn btn-ghost" data-cta>Let's Talk</a>
           </div>
         </div>
       </section>
@@ -589,7 +722,6 @@ function App() {
         ))}
       </section>
 
-      <PreFooterMarquee />
 
       {/* FOOTER */}
       <footer className="footer-new" id="contact">
